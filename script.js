@@ -50,10 +50,19 @@ let lastTime = performance.now();
 let delta = 0;
 const Fps = 60;
 const timePerFrame  = 1000/Fps;
+let thisFrame = 0;
+let lastFrameTime = 0;
+let currentFramesPerSecond = 0;
 function gameLoop(currentTime){
     if(lastTime === 0){
         lastTime = currentTime;
     }
+    if(currentTime > (lastFrameTime + 1000)){
+        currentFramesPerSecond = thisFrame;
+        thisFrame = 0;
+        lastFrameTime = currentTime;
+    }
+    thisFrame++;
     delta+= (currentTime - lastTime) / timePerFrame;
     lastTime = currentTime;
     if(delta > 10){
@@ -129,6 +138,9 @@ function render(interp = 0){
     ctx.font = "bold 22px Monospace";
     ctx.fillText("SCORE: " + score, 20, 40);
     ctx.fillText("HIGH SCORE: " + highScore,20,70)
+    ctx.fillStyle = "lime";
+    ctx.font = "bold 16px Monospace";
+    ctx.fillText("FPS: " + currentFramesPerSecond, (canvas.width - 90), 30);
     if (gameOver) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
