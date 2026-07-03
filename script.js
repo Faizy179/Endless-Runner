@@ -4,6 +4,8 @@ const ctx = canvas.getContext("2d");
 const GRAVITY = 1;
 const JUMPSTRENGTH = -15;
 const GROUNDY = 250;
+const jumpSound = new Audio("jumpSFX.mp3");
+const gameOverSound = new Audio("gameOver.mp3");
 const OBSTACLE_SIZE = [
 {
     w:20, h:30
@@ -15,7 +17,7 @@ const OBSTACLE_SIZE = [
     w:40, h:60
 },
 {
-    w:50, h:75
+    w:50, h:75 
 }
 ];
 let playerY = 250;
@@ -33,9 +35,11 @@ document.addEventListener("keydown", (event) => {
             resetGame();
         }
         else if(playerY === GROUNDY){
+            jumpSound.currentTime = 0;
+            jumpSound.play();
             playerVelocity = JUMPSTRENGTH;
         }
-    }
+    } 
 });
 function resetGame(){
     playerY = GROUNDY;
@@ -54,14 +58,14 @@ let thisFrame = 0;
 let lastFrameTime = 0;
 let currentFramesPerSecond = 0;
 function gameLoop(currentTime){
-    if(lastTime === 0){
+    if(lastTime === 0){ 
         lastTime = currentTime;
     }
     if(currentTime > (lastFrameTime + 1000)){
         currentFramesPerSecond = thisFrame;
         thisFrame = 0;
         lastFrameTime = currentTime;
-    }
+    } 
     thisFrame++;
     delta+= (currentTime - lastTime) / timePerFrame;
     lastTime = currentTime;
@@ -102,12 +106,14 @@ function updateLogic(){
         }
         let obsY = (GROUNDY + 30) - currentObstacle.h;
         if(50 < (obstacleX + currentObstacle.w) &&  (80) > obstacleX && playerY < (obsY + currentObstacle.h) && playerY + 30 > obsY){
+           gameOverSound.currentTime = 0;
+           gameOverSound.play();
             gameOver = true;
         }
     }  
 }
 function render(interp = 0){
-    ctx.fillStyle = "rgb(15, 15, 20)";
+    ctx.fillStyle = "rgb(15, 15, 20)";    
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     let smoothPlayerY = playerY;
     let smoothObstacleX = obstacleX;
