@@ -10,10 +10,12 @@ let playerVelocity = 0;
 let obstacleX = 450;
 let obstacleSpeed = 5;
 let score = 0;
+let highScore = localStorage.getItem("neonRunnerHighScore")|| 0;
 let gameOver = false;
 document.addEventListener("keydown", (event) => {
     if(event.code === "Space" ) {
         if(gameOver){
+
             resetGame();
         }
         else if(playerY === GROUNDY){
@@ -46,6 +48,10 @@ function updateLogic(){
         if(obstacleX < -20){
             obstacleX = 460;
             score++;
+             if(score > highScore){
+                highScore = score;
+                localStorage.setItem("neonRunnerHighScore", highScore);
+            }
             if(score % 5 === 0){
                 obstacleSpeed++;
             }
@@ -81,7 +87,7 @@ function render(){
     ctx.fillStyle = "white";
     ctx.font = "bold 22px Monospace";
     ctx.fillText("SCORE: " + score, 20, 40);
-
+    ctx.fillText("HIGH SCORE: " + highScore,20,70)
     if (gameOver) {
         ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
