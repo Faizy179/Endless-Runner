@@ -50,10 +50,10 @@ function updateLogic(){
                 obstacleSpeed++;
             }
         }
-        if(50 < obstacleX + 20 &&  50 + 30 > obstacleX && playerY < GROUNDY + 30 && playerY + 30 > GROUNDY)}{
+        if(50 < obstacleX + 20 &&  50 + 30 > obstacleX && playerY < GROUNDY + 30 && playerY + 30 > GROUNDY){
             gameOver = true;
         }
-    }
+    }  
 }
 function render(){
     ctx.fillStyle = "rgb(15, 15, 20)";
