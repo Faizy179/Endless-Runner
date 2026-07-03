@@ -1,7 +1,7 @@
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferStrategy;
+import javax.swing.*;
 public class Runner extends Canvas implements KeyListener, Runnable{
     private Thread mainThread;
     private boolean gameRunning;

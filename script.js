@@ -51,13 +51,19 @@ let delta = 0;
 const Fps = 60;
 const timePerFrame  = 1000/Fps;
 function gameLoop(currentTime){
+    if(lastTime === 0){
+        lastTime = currentTime;
+    }
     delta+= (currentTime - lastTime) / timePerFrame;
     lastTime = currentTime;
+    if(delta > 10){
+        delta = 1;
+    }
     while(delta >= 1){
         updateLogic();
         delta--;
     }
-    render();
+    render(delta);
     requestAnimationFrame(gameLoop);
 }
 function updateLogic(){
@@ -91,10 +97,15 @@ function updateLogic(){
         }
     }  
 }
-function render(){
+function render(interp = 0){
     ctx.fillStyle = "rgb(15, 15, 20)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
+    let smoothPlayerY = playerY;
+    let smoothObstacleX = obstacleX;
+    if(!gameOver){
+        smoothPlayerY +=playerVelocity * interp;
+        smoothObstacleX += obstacleSpeed *interp;
+    }
     ctx.strokeStyle = "rgba(0, 255, 255, 0.4)"; 
     ctx.lineWidth = 1;
     ctx.beginPath();
@@ -105,14 +116,14 @@ function render(){
     ctx.fillStyle = "rgb(0, 255, 255)";
     if (ctx.roundRect) {
         ctx.beginPath();
-        ctx.roundRect(50, playerY, 30, 30, 10);
+        ctx.roundRect(50, smoothPlayerY, 30, 30, 10);
         ctx.fill();
     } else {
-        ctx.fillRect(50, playerY, 30, 30);
+        ctx.fillRect(50, smoothPlayerY, 30, 30);
     }
     let obsY = (30+GROUNDY) - currentObstacle.h;
     ctx.fillStyle = "rgb(255, 0, 128)";
-    ctx.fillRect(obstacleX, obsY,currentObstacle.w,currentObstacle.h);
+    ctx.fillRect(smoothObstacleX, obsY,currentObstacle.w,currentObstacle.h);
 
     ctx.fillStyle = "white";
     ctx.font = "bold 22px Monospace";
