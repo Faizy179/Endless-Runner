@@ -1,7 +1,8 @@
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-public class Runner extends JPanel implements KeyListener, Runnable{
+import java.awt.image.BufferStrategy;
+public class Runner extends Canvas implements KeyListener, Runnable{
     private Thread mainThread;
     private boolean gameRunning;
     private boolean gameOver;
@@ -16,7 +17,14 @@ public class Runner extends JPanel implements KeyListener, Runnable{
     private final Color BACKGROUND = new Color(15,15,20);
     private final Color FLOOR = new Color(0,255,255,100);
     private final Color PLAYER = new Color(0,255,255);
+    private final Font SCORE_FONT = new Font("Monospaced", Font.BOLD, 22);
+    private final Font SYSTEM_FAILURE = new Font("Monospaced", Font.BOLD, 36);
+    private final Font REBOOT = new Font("Monospaced", Font.PLAIN, 16);
+    private Rectangle playerHitbox;
+    private Rectangle obstacleHitbox;
     public Runner(){
+        setPreferredSize(new Dimension(450,400));
+        setIgnoreRepaint(true);
         setFocusable(true);
         addKeyListener(this);
         gameOver = false;
@@ -27,6 +35,8 @@ public class Runner extends JPanel implements KeyListener, Runnable{
         obstacleSpeed = 6;
         gameRunning = false;
         setBackground(BACKGROUND);
+        playerHitbox = new Rectangle(50, playerY, 30, 30);
+        obstacleHitbox = new Rectangle(obstacleX, GROUNDY, 20, 30);
     }
     public void startGame(){
         gameRunning = true;
@@ -40,44 +50,68 @@ public class Runner extends JPanel implements KeyListener, Runnable{
         double ns = 1000000000/Fps;
         double delta = 0;
         while(gameRunning){
+            boolean shouldRender = false;
             long now = System.nanoTime();
             delta+= (now-lastTime)/ns;
             lastTime = now;
             while(delta >= 1){
                 updateLogic();
                 delta--;
+                shouldRender = true;
             }
-            repaint();
+            if(shouldRender){
+                render();
+            }
+            else{
+                try{
+                    Thread.sleep(1);
+                }
+                catch(InterruptedException e){
+                    System.out.println("Error sleeping");
+                }
+            }
         }
     }
-    @Override
-    protected void paintComponent(Graphics graphics){
-        super.paintComponent(graphics);
+    
+    protected void render( ){
+        BufferStrategy bufferStrategy = this.getBufferStrategy(); 
+        if(bufferStrategy == null){
+            this.createBufferStrategy(2);
+            return;
+        }
 
-        Graphics2D graphics2D = (Graphics2D) graphics;
+        Graphics2D graphics2D = (Graphics2D) bufferStrategy.getDrawGraphics();
+        graphics2D.setColor(BACKGROUND);
+        graphics2D.fillRect(0, 0, getWidth(), getHeight()); 
+
         graphics2D.setColor(FLOOR);
         graphics2D.drawLine(0,(GROUNDY+30),getWidth(),(GROUNDY+30));
+
         graphics2D.setColor(PLAYER);
         graphics2D.fillRoundRect(50,playerY,30,30,10,10);
+
         Color colour = new Color(255,0,128);
         graphics2D.setColor(colour);
         graphics2D.fillRect(obstacleX,GROUNDY,20,30);
+
         graphics2D.setColor(Color.WHITE);
-        graphics2D.setFont(new Font("Monospaced", Font.BOLD, 22));
+        graphics2D.setFont(SCORE_FONT);
         graphics2D.drawString("SCORE: " + score, 20, 40);
         if(gameOver){
-            graphics2D.setColor(new Color(0, 0, 0, 150)); // Dark overlay
+            graphics2D.setColor(new Color(0, 0, 0, 150)); 
             graphics2D.fillRect(0, 0, getWidth(), getHeight());
 
             graphics2D.setColor(Color.WHITE);
-            graphics2D.setFont(new Font("Monospaced", Font.BOLD, 36));
-            graphics2D.drawString("SYSTEM FAILURE", 50, 150);
-            
-            graphics2D.setFont(new Font("Monospaced", Font.PLAIN, 16));
-            graphics2D.drawString("> Press SPACE to reboot_", 70, 190);
+            graphics2D.setFont(SYSTEM_FAILURE);
+            graphics2D.drawString("GAME OVER", 50, 150);
+            graphics2D.setFont(REBOOT);
+            graphics2D.drawString("> Press SPACE to restart", 70, 190);
         }
+        graphics2D.dispose();
+        bufferStrategy.show();
         Toolkit.getDefaultToolkit().sync();
      }
+
      public void  updateLogic(){
         if(!gameOver){
             playerVelocity+=GRAVITY;
@@ -88,16 +122,16 @@ public class Runner extends JPanel implements KeyListener, Runnable{
             }
             obstacleX -= obstacleSpeed;
             if(obstacleX < -20){
-                obstacleX = 400;
+                obstacleX = 460;
                 score++;
 
                 if(score % 5 == 0){
                     obstacleSpeed++;
                 }
             }
-            Rectangle player = new Rectangle(50,playerY,30,30);
-            Rectangle obstacle = new Rectangle(obstacleX,GROUNDY,20,30);
-            if(player.intersects(obstacle)){
+            playerHitbox.setLocation(50,playerY);
+            obstacleHitbox.setLocation(obstacleX,GROUNDY);
+            if(playerHitbox.intersects(obstacleHitbox)){
                 gameOver = true;
             }
         }
@@ -132,11 +166,12 @@ public class Runner extends JPanel implements KeyListener, Runnable{
         JFrame frame = new JFrame("Endless Runner");
         Runner game = new Runner();
         frame.add(game);
-        frame.setSize(450,300);
+        frame.pack();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocationRelativeTo(null);
         frame.setResizable(false);
         frame.setVisible(true);
+        game.requestFocusInWindow();
         game.startGame();
      }
 }
