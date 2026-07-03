@@ -46,8 +46,17 @@ function resetGame(){
     gameOver = false;
     currentObstacle = OBSTACLE_SIZE[0];
 }
-function gameLoop(){
-    updateLogic();
+let lastTime = performance.now();
+let delta = 0;
+const Fps = 60;
+const timePerFrame  = 1000/Fps;
+function gameLoop(currentTime){
+    delta+= (currentTime - lastTime) / timePerFrame;
+    lastTime = currentTime;
+    while(delta >= 1){
+        updateLogic();
+        delta--;
+    }
     render();
     requestAnimationFrame(gameLoop);
 }
