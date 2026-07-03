@@ -104,7 +104,7 @@ function render(interp = 0){
     let smoothObstacleX = obstacleX;
     if(!gameOver){
         smoothPlayerY +=playerVelocity * interp;
-        smoothObstacleX += obstacleSpeed *interp;
+        smoothObstacleX -= obstacleSpeed *interp;
     }
     ctx.strokeStyle = "rgba(0, 255, 255, 0.4)"; 
     ctx.lineWidth = 1;
