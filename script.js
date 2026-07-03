@@ -4,10 +4,24 @@ const ctx = canvas.getContext("2d");
 const GRAVITY = 1;
 const JUMPSTRENGTH = -15;
 const GROUNDY = 250;
-
+const OBSTACLE_SIZE = [
+{
+    w:20, h:30
+},
+{
+    w:30, h :40
+},
+{
+    w:40, h:60
+},
+{
+    w:50, h:75
+}
+];
 let playerY = 250;
 let playerVelocity = 0;
 let obstacleX = 450;
+let currentObstacle = OBSTACLE_SIZE[0];
 let obstacleSpeed = 5;
 let score = 0;
 let highScore = localStorage.getItem("neonRunnerHighScore")|| 0;
@@ -30,6 +44,7 @@ function resetGame(){
     obstacleX = 460;
     obstacleSpeed = 6;
     gameOver = false;
+    currentObstacle = OBSTACLE_SIZE[0];
 }
 function gameLoop(){
     updateLogic();
@@ -45,18 +60,24 @@ function updateLogic(){
             playerVelocity = 0;
         }
         obstacleX -= obstacleSpeed;
-        if(obstacleX < -20){
+        if(obstacleX < -currentObstacle.w){
             obstacleX = 460;
             score++;
              if(score > highScore){
                 highScore = score;
                 localStorage.setItem("neonRunnerHighScore", highScore);
             }
+            let currentLevel = Math.floor(score/5) + 1;
+            let maxIndex = Math.min(currentLevel,4) -1;
+            let randomIndex = Math.floor(Math.random()*(maxIndex+1));
+            currentObstacle = OBSTACLE_SIZE[randomIndex];
             if(score % 5 === 0){
                 obstacleSpeed++;
             }
+
         }
-        if(50 < obstacleX + 20 &&  50 + 30 > obstacleX && playerY < GROUNDY + 30 && playerY + 30 > GROUNDY){
+        let obsY = (GROUNDY + 30) - currentObstacle.h;
+        if(50 < (obstacleX + currentObstacle.w) &&  (80) > obstacleX && playerY < (obsY + currentObstacle.h) && playerY + 30 > obsY){
             gameOver = true;
         }
     }  
@@ -80,9 +101,9 @@ function render(){
     } else {
         ctx.fillRect(50, playerY, 30, 30);
     }
-
+    let obsY = (30+GROUNDY) - currentObstacle.h;
     ctx.fillStyle = "rgb(255, 0, 128)";
-    ctx.fillRect(obstacleX, GROUNDY, 20, 30);
+    ctx.fillRect(obstacleX, obsY,currentObstacle.w,currentObstacle.h);
 
     ctx.fillStyle = "white";
     ctx.font = "bold 22px Monospace";
